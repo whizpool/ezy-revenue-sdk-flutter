@@ -9,7 +9,7 @@ import 'dart:io';
 export 'revenue_cat_replica_models.dart';
 
 class RevenueCatReplica {
-  static const String _baseUrl = 'http://192.168.0.249:3000';
+  static const String _baseUrl = 'https://api-ezyrevenue.doctors-finder.com';
   static const String sdkVersion = '0.0.1';
 
   String? _apiKey;
@@ -142,7 +142,7 @@ class RevenueCatReplica {
               .expand((offering) => offering.packages)
               .expand((package) => package.products)
               .toList();
-          
+
           if (allProducts.isNotEmpty) {
             await _syncProductsWithStore(allProducts);
           }
@@ -249,7 +249,7 @@ class RevenueCatReplica {
       print("Starting purchase for product: ${package.platformProductIdentifier}");
       final bool success = await RevenueCatReplicaPlatform.instance
           .purchaseProduct(package.products[0].googleSubscriptionId!, appUserId: _appUserId);
-      
+
       print("Native purchase result: $success");
       if (success) {
         showToast("Purchase Successful!");
@@ -269,7 +269,7 @@ class RevenueCatReplica {
       print("Starting iOS purchase for product: $productId");
       final bool success = await RevenueCatReplicaPlatform.instance
           .purchaseProduct(productId, appUserId: _appUserId);
-      
+
       print("Native iOS purchase result: $success");
       if (success) {
         showToast("Purchase Successful!");

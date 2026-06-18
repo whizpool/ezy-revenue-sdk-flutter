@@ -34,11 +34,11 @@ class RevenueCatReplicaWeb extends RevenueCatReplicaPlatform {
     return null;
   }
 
-  @override
-  Future<bool> purchaseProduct(String productIdentifier) async {
-    // Web implementation of purchase could be a redirect to a payment page
-    // or not supported if it's strictly for mobile stores.
-    print('Purchase not implemented for web: $productIdentifier');
-    return false;
-  }
+  // @override
+  // Future<bool> purchaseProduct(String productIdentifier) async {
+  //   // Web implementation of purchase could be a redirect to a payment page
+  //   // or not supported if it's strictly for mobile stores.
+  //   print('Purchase not implemented for web: $productIdentifier');
+  //   return false;
+  // }
 }

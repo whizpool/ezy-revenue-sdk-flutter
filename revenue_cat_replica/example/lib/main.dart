@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _revenueCatReplicaPlugin.configure("goog_2rukr7yydmucvjld13us2xxakkb37qvtzhtrfs");
+    // _revenueCatReplicaPlugin.configure("goog_2rukr7yydmucvjld13us2xxakkb37qvtzhtrfs");
     initPlatformState();
   }
 
