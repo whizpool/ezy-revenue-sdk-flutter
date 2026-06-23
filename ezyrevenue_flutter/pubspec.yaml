@@ -1,0 +1,42 @@
+name: ezyrevenue
+description: "EzyRevenue Flutter SDK — Simplify in-app subscription management across iOS and Android with a single API."
+version: 0.0.1
+homepage: https://ezyrevenue.com
+repository: https://github.com/whizpool/ezyrevenue-flutter
+issue_tracker: https://github.com/whizpool/ezyrevenue-flutter/issues
+topics:
+  - subscriptions
+  - in-app-purchases
+  - monetization
+  - payments
+
+environment:
+  sdk: ^3.11.1
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  web: ^1.0.0
+  plugin_platform_interface: ^2.0.2
+  http: ^1.1.0
+  shared_preferences: ^2.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.whizpool.ezyrevenue
+        pluginClass: EzyrevenuePlugin
+      ios:
+        pluginClass: EzyrevenuePlugin
+      web:
+        pluginClass: EzyRevenueWeb
+        fileName: ezyrevenue_web.dart
