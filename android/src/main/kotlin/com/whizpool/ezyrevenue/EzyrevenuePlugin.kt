@@ -79,6 +79,9 @@ class EzyrevenuePlugin :
                 }
                 fetchProducts(productIdentifiers, result)
             }
+            "checkUnacknowledgedPurchases" -> {
+                checkUnacknowledgedPurchases(result)
+            }
             else -> {
                 result.notImplemented()
             }
@@ -252,6 +255,11 @@ class EzyrevenuePlugin :
         println("onPurchasesUpdated: ${billingResult.responseCode}, ${billingResult.debugMessage}")
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             println("Purchase successful")
+            purchases.forEach { purchase ->
+                if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged) {
+                    acknowledgePurchase(purchase)
+                }
+            }
             pendingResult?.success(true)
         } else if (billingResult.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
             println("Purchase user canceled")
@@ -261,6 +269,55 @@ class EzyrevenuePlugin :
             pendingResult?.success(false)
         }
         pendingResult = null
+    }
+
+    private fun checkUnacknowledgedPurchases(result: Result?) {
+        billingClient?.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    val paramsSubs = QueryPurchasesParams.newBuilder()
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build()
+                    billingClient?.queryPurchasesAsync(paramsSubs) { resSubs, purchasesSubs ->
+                        if (resSubs.responseCode == BillingClient.BillingResponseCode.OK) {
+                            purchasesSubs.forEach { purchase ->
+                                if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged) {
+                                    acknowledgePurchase(purchase)
+                                }
+                            }
+                        }
+                    }
+
+                    val paramsInApp = QueryPurchasesParams.newBuilder()
+                        .setProductType(BillingClient.ProductType.INAPP)
+                        .build()
+                    billingClient?.queryPurchasesAsync(paramsInApp) { resInApp, purchasesInApp ->
+                        if (resInApp.responseCode == BillingClient.BillingResponseCode.OK) {
+                            purchasesInApp.forEach { purchase ->
+                                if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged) {
+                                    acknowledgePurchase(purchase)
+                                }
+                            }
+                        }
+                    }
+                    result?.success(null)
+                } else {
+                    result?.error("BILLING_ERROR", "Setup failed", null)
+                }
+            }
+
+            override fun onBillingServiceDisconnected() {
+            }
+        })
+    }
+
+    private fun acknowledgePurchase(purchase: Purchase) {
+        val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+            .setPurchaseToken(purchase.purchaseToken)
+            .build()
+        billingClient?.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
+            println("Acknowledge purchase result: ${billingResult.responseCode}")
+        }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {

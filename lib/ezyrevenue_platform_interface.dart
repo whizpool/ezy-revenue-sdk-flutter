@@ -42,4 +42,8 @@ abstract class EzyRevenuePlatform extends PlatformInterface {
   Future<String?> getAppVersion() {
     throw UnimplementedError('getAppVersion() has not been implemented.');
   }
+
+  Future<void> checkUnacknowledgedPurchases() {
+    throw UnimplementedError('checkUnacknowledgedPurchases() has not been implemented.');
+  }
 }

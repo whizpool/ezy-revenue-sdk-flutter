@@ -136,6 +136,14 @@ class EzyRevenue {
       await sdk._performLogin();
     }
 
+    if (Platform.isAndroid) {
+      try {
+        await EzyRevenuePlatform.instance.checkUnacknowledgedPurchases();
+      } catch (e) {
+        sdk._logger.error('Error checking unacknowledged purchases: $e');
+      }
+    }
+
     _instance = sdk;
     sdk._logger.verbose('EzyRevenue SDK initialized successfully.');
   }

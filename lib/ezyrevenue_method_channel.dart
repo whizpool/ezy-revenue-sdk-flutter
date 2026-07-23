@@ -54,6 +54,11 @@ class MethodChannelEzyRevenue extends EzyRevenuePlatform {
     return await methodChannel.invokeMethod<String>('getAppVersion');
   }
 
+  @override
+  Future<void> checkUnacknowledgedPurchases() async {
+    await methodChannel.invokeMethod<void>('checkUnacknowledgedPurchases');
+  }
+
   void _log(String message) {
     // We can print/log using debugPrint or delegate it.
     debugPrint("[MethodChannelEzyRevenue] $message");
