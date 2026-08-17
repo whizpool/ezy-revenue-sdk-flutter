@@ -7,8 +7,8 @@ void main() async {
   // One-call initialization — handles login & session persistence automatically
   await EzyRevenue.init(
     config: EzyRevenueConfig(
-      apiKey: 'goog_yq1f0lgstqzihbqp41ol9wvebkp1qcnlv0codk',
-      appUserId: '96ebc94e-152f-4971-a263-6bbfdfabdd25',
+      apiKey: 'YOUR_EZYREVENUE_API_KEY',
+      appUserId: 'YOUR_UNIQUE_USER_ID',
       logLevel: LogLevel.verbose,
       onLog: (msg) => debugPrint('ExampleApp: $msg'),
     ),

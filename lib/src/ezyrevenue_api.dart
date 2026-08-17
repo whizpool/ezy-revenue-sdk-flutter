@@ -12,7 +12,7 @@ import 'models/models.dart';
 /// This class is not part of the public API. Consumers interact with
 /// [EzyRevenue] instead.
 class EzyRevenueApi {
-  static const String _baseUrl = 'https://api-ezyrevenue.doctors-finder.com';
+  static const String _baseUrl = 'https://api.ezyrevenue.com';
   static const String _sdkVersion = '0.0.1';
 
   final String _apiKey;
