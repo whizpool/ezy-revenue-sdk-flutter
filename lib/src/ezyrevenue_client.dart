@@ -43,6 +43,9 @@ class EzyRevenue {
   String? _appAccessToken;
   List<Offering> _offerings = [];
 
+  /// Cached list of all offerings.
+  List<Offering> get offerings => List.unmodifiable(_offerings);
+
   /// The currently active offering, or `null` if none has been set.
   Offering? currentOffering;
 

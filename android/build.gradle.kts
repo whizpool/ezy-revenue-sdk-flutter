@@ -3,7 +3,6 @@ version = "1.0-SNAPSHOT"
 
 plugins {
     id("com.android.library")
-    id("kotlin-android")
 }
 
 android {
@@ -14,10 +13,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        jvmToolchain(17)
     }
 
     sourceSets {

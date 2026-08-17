@@ -22,7 +22,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  ezyrevenue: ^0.0.1
+  ezyrevenue: ^0.0.4
 ```
 
 Then run:
