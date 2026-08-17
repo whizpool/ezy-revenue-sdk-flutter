@@ -11,7 +11,8 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('saves encrypted token and restores original token successfully', () async {
+    test('saves encrypted token and restores original token successfully',
+        () async {
       const storage = EzyRevenueSessionStorage(logger: EzyRevenueLogger.silent);
       const testUserId = 'test-user-123';
       const testToken = 'jwt.secret.access_token_xyz_987';
@@ -32,7 +33,9 @@ void main() {
       expect(session.accessToken, equals(testToken));
     });
 
-    test('backward compatibility: restores unencrypted tokens from legacy versions', () async {
+    test(
+        'backward compatibility: restores unencrypted tokens from legacy versions',
+        () async {
       const testUserId = 'legacy-user';
       const testToken = 'plain-text-token-legacy';
 

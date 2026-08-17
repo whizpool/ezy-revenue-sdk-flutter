@@ -15,9 +15,8 @@ class OfferingsResponse {
   factory OfferingsResponse.fromJson(Map<String, dynamic> json) {
     return OfferingsResponse(
       currentOfferingId: json['current_offering_id'],
-      offerings: (json['offerings'] as List)
-          .map((i) => Offering.fromJson(i))
-          .toList(),
+      offerings:
+          (json['offerings'] as List).map((i) => Offering.fromJson(i)).toList(),
     );
   }
 }
@@ -51,9 +50,8 @@ class Offering {
       identifier: json['identifier'],
       description: json['description'],
       isDefault: json['isDefault'] ?? false,
-      packages: (json['packages'] as List)
-          .map((i) => Package.fromJson(i))
-          .toList(),
+      packages:
+          (json['packages'] as List).map((i) => Package.fromJson(i)).toList(),
     );
   }
 }
@@ -83,9 +81,8 @@ class Package {
     return Package(
       identifier: json['identifier'],
       platformProductIdentifier: json['platform_product_identifier'],
-      products: (json['products'] as List)
-          .map((i) => Product.fromJson(i))
-          .toList(),
+      products:
+          (json['products'] as List).map((i) => Product.fromJson(i)).toList(),
     );
   }
 }

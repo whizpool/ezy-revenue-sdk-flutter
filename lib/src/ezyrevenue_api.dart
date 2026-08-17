@@ -41,9 +41,8 @@ class EzyRevenueApi {
   Future<Map<String, String>> _authHeaders({
     required String platformVersion,
   }) async {
-    final locale = ui.PlatformDispatcher.instance.locale
-        .toString()
-        .replaceAll('_', '-');
+    final locale =
+        ui.PlatformDispatcher.instance.locale.toString().replaceAll('_', '-');
     final sdkVersionHeader =
         'flutter (${Platform.isIOS ? 'iOS' : 'Android'} SDK $_sdkVersion)';
 
@@ -138,7 +137,8 @@ class EzyRevenueApi {
       }
 
       if (productsData == null) {
-        _logger.error('Could not find products list in response: $responseData');
+        _logger
+            .error('Could not find products list in response: $responseData');
         return [];
       }
 

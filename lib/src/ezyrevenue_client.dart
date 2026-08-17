@@ -213,8 +213,7 @@ class EzyRevenue {
 
     // Set the default offering
     try {
-      currentOffering =
-          _offerings.firstWhere((offering) => offering.isDefault);
+      currentOffering = _offerings.firstWhere((offering) => offering.isDefault);
     } catch (_) {
       currentOffering = null;
     }

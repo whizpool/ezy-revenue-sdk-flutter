@@ -26,7 +26,8 @@ class MethodChannelEzyRevenue extends EzyRevenuePlatform {
   }
 
   @override
-  Future<bool> purchaseProduct(String productIdentifier, {String? appUserId}) async {
+  Future<bool> purchaseProduct(String productIdentifier,
+      {String? appUserId}) async {
     _log("appUserId: $appUserId");
     final success = await methodChannel.invokeMethod<bool>(
       'purchaseProduct',
@@ -39,14 +40,16 @@ class MethodChannelEzyRevenue extends EzyRevenuePlatform {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getProducts(List<String> productIdentifiers) async {
+  Future<List<Map<String, dynamic>>> getProducts(
+      List<String> productIdentifiers) async {
     final products = await methodChannel.invokeMethod<List<dynamic>>(
       'getProducts',
       {
         'productIdentifiers': productIdentifiers,
       },
     );
-    return products?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
+    return products?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ??
+        [];
   }
 
   @override

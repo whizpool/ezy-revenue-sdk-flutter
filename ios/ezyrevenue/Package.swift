@@ -16,7 +16,7 @@ let package = Package(
         .target(
             name: "ezyrevenue",
             dependencies: [],
-            path: "ios/Classes",
+            path: "../Classes",
             resources: [
                 .process("../Resources/PrivacyInfo.xcprivacy")
             ]

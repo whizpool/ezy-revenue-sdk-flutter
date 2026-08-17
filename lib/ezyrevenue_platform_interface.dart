@@ -35,7 +35,8 @@ abstract class EzyRevenuePlatform extends PlatformInterface {
     throw UnimplementedError('purchaseProduct() has not been implemented.');
   }
 
-  Future<List<Map<String, dynamic>>> getProducts(List<String> productIdentifiers) {
+  Future<List<Map<String, dynamic>>> getProducts(
+      List<String> productIdentifiers) {
     throw UnimplementedError('getProducts() has not been implemented.');
   }
 
@@ -44,6 +45,7 @@ abstract class EzyRevenuePlatform extends PlatformInterface {
   }
 
   Future<void> checkUnacknowledgedPurchases() {
-    throw UnimplementedError('checkUnacknowledgedPurchases() has not been implemented.');
+    throw UnimplementedError(
+        'checkUnacknowledgedPurchases() has not been implemented.');
   }
 }

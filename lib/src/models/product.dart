@@ -13,9 +13,7 @@ class ProductsResponse {
   factory ProductsResponse.fromJson(Map<String, dynamic> json) {
     return ProductsResponse(
       success: json['success'] ?? false,
-      data: (json['data'] as List)
-          .map((i) => Product.fromJson(i))
-          .toList(),
+      data: (json['data'] as List).map((i) => Product.fromJson(i)).toList(),
     );
   }
 }
