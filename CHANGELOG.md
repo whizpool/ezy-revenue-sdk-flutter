@@ -1,3 +1,10 @@
+## 0.0.3
+
+* Fixed Web & WASM compatibility by removing direct `dart:io` dependency in client code.
+* Migrated Android plugin to Built-in Kotlin / `jvmToolchain(17)` standards.
+* Relocated Swift Package Manager (SPM) manifest to `ios/ezyrevenue/Package.swift`.
+* Formatted Dart files according to standard `dart format`.
+
 ## 0.0.2
 
 * Added Swift Package Manager (SPM) support for iOS.

@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'ezyrevenue_logger.dart';
@@ -13,7 +13,7 @@ import 'models/models.dart';
 /// [EzyRevenue] instead.
 class EzyRevenueApi {
   static const String _baseUrl = 'https://api.ezyrevenue.com';
-  static const String _sdkVersion = '0.0.2';
+  static const String _sdkVersion = '0.0.3';
 
   final String _apiKey;
   final EzyRevenueLogger _logger;
@@ -43,8 +43,10 @@ class EzyRevenueApi {
   }) async {
     final locale =
         ui.PlatformDispatcher.instance.locale.toString().replaceAll('_', '-');
-    final sdkVersionHeader =
-        'flutter (${Platform.isIOS ? 'iOS' : 'Android'} SDK $_sdkVersion)';
+    final platformName = kIsWeb
+        ? 'Web'
+        : (defaultTargetPlatform == TargetPlatform.iOS ? 'iOS' : 'Android');
+    final sdkVersionHeader = 'flutter ($platformName SDK $_sdkVersion)';
 
     return {
       ..._baseHeaders(),

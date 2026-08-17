@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'ezyrevenue_api.dart';
 import 'ezyrevenue_config.dart';
@@ -28,105 +28,98 @@ import '../ezyrevenue_platform_interface.dart';
 /// final offerings = await EzyRevenue.instance.getOfferings();
 /// ```
 ///
-/// The SDK automatically:
-/// - Authenticates the user on first launch
-/// - Persists the session locally so subsequent launches skip the login call
-/// - Syncs product prices with the native store (Google Play / App Store)
+/// See also:
+/// - [EzyRevenueConfig] for all initialization options.
+/// - [Offering] and [Package] for displaying paywalls.
+/// - [Product] for available purchase items.
 class EzyRevenue {
-  // ── Private constructor & singleton ──────────────────────────────────
-
-  EzyRevenue._();
-
   static EzyRevenue? _instance;
 
-  /// The shared singleton instance.
+  final EzyRevenueConfig _config;
+  final EzyRevenueApi _api;
+  final EzyRevenueLogger _logger;
+  final EzyRevenueSessionStorage _sessionStorage;
+
+  String? _appAccessToken;
+  List<Offering> _offerings = [];
+
+  /// The currently active offering, or `null` if none has been set.
+  Offering? currentOffering;
+
+  // ── Private constructor ─────────────────────────────────────────────
+
+  EzyRevenue._({
+    required EzyRevenueConfig config,
+    required EzyRevenueApi api,
+    required EzyRevenueLogger logger,
+    required EzyRevenueSessionStorage sessionStorage,
+  })  : _config = config,
+        _api = api,
+        _logger = logger,
+        _sessionStorage = sessionStorage;
+
+  // ── Singleton Accessor ──────────────────────────────────────────────
+
+  /// Returns the initialized singleton instance.
   ///
-  /// Throws a [StateError] if [init] has not been called yet.
+  /// Throws a [StateError] if [init] has not been called first.
   static EzyRevenue get instance {
     if (_instance == null) {
       throw StateError(
-        'EzyRevenue has not been initialized. '
-        'Call EzyRevenue.init() before accessing the instance.',
+        'EzyRevenue has not been initialized. Call EzyRevenue.init() first.',
       );
     }
     return _instance!;
   }
 
-  /// Whether the SDK has been initialized.
+  /// Returns `true` if the SDK has been initialized.
   static bool get isInitialized => _instance != null;
-
-  // ── Internal state ──────────────────────────────────────────────────
-
-  late final EzyRevenueConfig _config;
-  late final EzyRevenueLogger _logger;
-  late final EzyRevenueApi _api;
-  late final EzyRevenueSessionStorage _sessionStorage;
-
-  String? _appAccessToken;
-
-  /// The current default offering, if available.
-  Offering? currentOffering;
-
-  /// Cached list of all offerings.
-  List<Offering> _offerings = [];
-
-  /// Read-only access to the cached offerings list.
-  List<Offering> get offerings => List.unmodifiable(_offerings);
 
   // ── Initialization ──────────────────────────────────────────────────
 
   /// The current version of the SDK.
-  static const String sdkVersion = '0.0.2';
+  static const String sdkVersion = '0.0.3';
 
   /// Initializes the EzyRevenue SDK.
   ///
-  /// This method:
-  /// 1. Configures the SDK with the provided [config].
-  /// 2. Checks for a previously saved login session.
-  /// 3. If a valid session exists for the same user, restores it (no network call).
-  /// 4. Otherwise, authenticates with the backend and persists the new session.
-  ///
-  /// Must be called before accessing [instance]. Typically called once in
-  /// `main()` before `runApp()`.
+  /// This must be called before accessing [instance] or any SDK methods.
+  /// Subsequent calls will re-initialize the SDK with the new configuration.
   ///
   /// ```dart
-  /// void main() async {
-  ///   WidgetsFlutterBinding.ensureInitialized();
-  ///   await EzyRevenue.init(
-  ///     config: EzyRevenueConfig(
-  ///       apiKey: 'your_api_key',
-  ///       appUserId: 'user-uuid',
-  ///     ),
-  ///   );
-  ///   runApp(const MyApp());
-  /// }
+  /// await EzyRevenue.init(
+  ///   config: EzyRevenueConfig(
+  ///     apiKey: 'your_api_key',
+  ///     appUserId: 'user-123',
+  ///   ),
+  /// );
   /// ```
-  ///
-  /// Throws an [Exception] if login fails and no cached session is available.
   static Future<void> init({required EzyRevenueConfig config}) async {
-    final sdk = EzyRevenue._();
-    sdk._config = config;
-
-    sdk._logger = EzyRevenueLogger(
+    final logger = EzyRevenueLogger(
       level: config.logLevel,
       onLog: config.onLog,
     );
 
-    sdk._api = EzyRevenueApi(
+    final api = EzyRevenueApi(
       apiKey: config.apiKey,
-      logger: sdk._logger,
+      logger: logger,
     );
 
-    sdk._sessionStorage = EzyRevenueSessionStorage(logger: sdk._logger);
+    final sessionStorage = EzyRevenueSessionStorage(logger: logger);
 
-    sdk._logger.verbose('Initializing EzyRevenue SDK v$sdkVersion');
-    sdk._logger.verbose('User ID: ${config.appUserId}');
+    final sdk = EzyRevenue._(
+      config: config,
+      api: api,
+      logger: logger,
+      sessionStorage: sessionStorage,
+    );
 
-    // Try to restore a cached session for this user
-    final hasSession =
+    logger.verbose('Initializing EzyRevenue SDK v$sdkVersion...');
+
+    // Check for a cached session matching this appUserId
+    final hasValidSession =
         await sdk._sessionStorage.hasValidSession(config.appUserId);
 
-    if (hasSession) {
+    if (hasValidSession) {
       final session = await sdk._sessionStorage.loadSession();
       sdk._appAccessToken = session!.accessToken;
       sdk._logger.verbose('Restored cached session — skipping network login.');
@@ -136,7 +129,7 @@ class EzyRevenue {
       await sdk._performLogin();
     }
 
-    if (Platform.isAndroid) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       try {
         await EzyRevenuePlatform.instance.checkUnacknowledgedPurchases();
       } catch (e) {
@@ -254,7 +247,7 @@ class EzyRevenue {
   /// Automatically routes to the correct native purchase flow based on
   /// the current platform (iOS or Android).
   Future<bool> purchasePackage(Package package) async {
-    return Platform.isIOS
+    return (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
         ? _purchasePackageIOS(package)
         : _purchasePackageAndroid(package);
   }
@@ -333,9 +326,11 @@ class EzyRevenue {
   }
 
   Future<void> _syncProductsWithStore(List<Product> products) async {
+    final isAndroid =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
     final storeProductIds = products
         .map((product) {
-          if (Platform.isAndroid) {
+          if (isAndroid) {
             return product.googleSubscriptionId ?? product.identifier;
           } else {
             return product.identifier;
@@ -351,7 +346,7 @@ class EzyRevenue {
       final storeProducts =
           await EzyRevenuePlatform.instance.getProducts(storeProductIds);
       for (var product in products) {
-        final productIdToMatch = Platform.isAndroid
+        final productIdToMatch = isAndroid
             ? (product.googleSubscriptionId ?? product.identifier)
             : product.identifier;
 
