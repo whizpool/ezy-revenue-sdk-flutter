@@ -76,7 +76,7 @@ class EzyRevenue {
   // ── Initialization ──────────────────────────────────────────────────
 
   /// The current version of the SDK.
-  static const String sdkVersion = '0.0.1';
+  static const String sdkVersion = '0.0.2';
 
   /// Initializes the EzyRevenue SDK.
   ///

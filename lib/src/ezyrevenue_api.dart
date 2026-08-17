@@ -13,7 +13,7 @@ import 'models/models.dart';
 /// [EzyRevenue] instead.
 class EzyRevenueApi {
   static const String _baseUrl = 'https://api.ezyrevenue.com';
-  static const String _sdkVersion = '0.0.1';
+  static const String _sdkVersion = '0.0.2';
 
   final String _apiKey;
   final EzyRevenueLogger _logger;
