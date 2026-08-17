@@ -19,9 +19,10 @@ class EzyRevenueLogger {
   /// A no-op logger that silences all output.
   static const EzyRevenueLogger silent = EzyRevenueLogger(level: LogLevel.none);
 
-  /// Logs a verbose message. Only printed when [LogLevel.verbose] is active.
+  /// Logs a verbose message. Only printed in debug/profile mode when [LogLevel.verbose] is active.
+  /// Always silenced in release mode to prevent exposing tokens or sensitive headers.
   void verbose(String message) {
-    if (_level == LogLevel.verbose) {
+    if (_level == LogLevel.verbose && !kReleaseMode) {
       _emit(message);
     }
   }

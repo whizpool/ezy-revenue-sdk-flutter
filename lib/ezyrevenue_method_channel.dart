@@ -60,7 +60,8 @@ class MethodChannelEzyRevenue extends EzyRevenuePlatform {
   }
 
   void _log(String message) {
-    // We can print/log using debugPrint or delegate it.
-    debugPrint("[MethodChannelEzyRevenue] $message");
+    if (kDebugMode) {
+      debugPrint("[MethodChannelEzyRevenue] $message");
+    }
   }
 }

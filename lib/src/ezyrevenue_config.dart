@@ -19,6 +19,7 @@ enum LogLevel {
 ///   config: EzyRevenueConfig(
 ///     apiKey: 'your_api_key',
 ///     appUserId: 'user-uuid',
+///     logLevel: kDebugMode ? LogLevel.verbose : LogLevel.none,
 ///   ),
 /// );
 /// ```
@@ -31,21 +32,15 @@ class EzyRevenueConfig {
   /// The unique identifier for the current app user.
   final String appUserId;
 
-  /// Controls the verbosity of SDK log output. Defaults to [LogLevel.none].
+  /// Controls the verbosity of SDK log output.
+  ///
+  /// In release mode (`kReleaseMode`), logs are disabled by default
+  /// to prevent accidental exposure of tokens and internal details.
   final LogLevel logLevel;
 
   /// Optional callback invoked whenever the SDK produces a log message.
   ///
-  /// Use this to route SDK logs to your own logging system, show toasts,
-  /// or display snackbars — the SDK does not impose any UI.
-  ///
-  /// ```dart
-  /// EzyRevenueConfig(
-  ///   apiKey: 'key',
-  ///   appUserId: 'user',
-  ///   onLog: (msg) => debugPrint('MyApp: $msg'),
-  /// );
-  /// ```
+  /// Use this to route SDK logs to your own logging system.
   final void Function(String message)? onLog;
 
   /// Creates an [EzyRevenueConfig].

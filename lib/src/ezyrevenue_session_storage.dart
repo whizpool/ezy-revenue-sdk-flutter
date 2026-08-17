@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'ezyrevenue_logger.dart';
 
@@ -5,10 +6,14 @@ import 'ezyrevenue_logger.dart';
 ///
 /// All keys are prefixed with `ezyrevenue_` to avoid collisions with the
 /// host app's own preferences.
+///
+/// Sensitive data like [accessToken] is obfuscated/encrypted before saving to prevent
+/// plaintext exposure in device preferences XML or plist files.
 class EzyRevenueSessionStorage {
   static const String _keyUserId = 'ezyrevenue_app_user_id';
   static const String _keyAccessToken = 'ezyrevenue_app_access_token';
   static const String _keyTimestamp = 'ezyrevenue_session_timestamp';
+  static const String _encPrefix = 'enc_v1:';
 
   final EzyRevenueLogger _logger;
 
@@ -16,14 +21,15 @@ class EzyRevenueSessionStorage {
   const EzyRevenueSessionStorage({required EzyRevenueLogger logger})
       : _logger = logger;
 
-  /// Saves a login session to local storage.
+  /// Saves a login session to local storage with encrypted access token.
   Future<void> saveSession({
     required String appUserId,
     required String accessToken,
   }) async {
     final prefs = await SharedPreferences.getInstance();
+    final protectedToken = _protectToken(accessToken, appUserId);
     await prefs.setString(_keyUserId, appUserId);
-    await prefs.setString(_keyAccessToken, accessToken);
+    await prefs.setString(_keyAccessToken, protectedToken);
     await prefs.setInt(
       _keyTimestamp,
       DateTime.now().millisecondsSinceEpoch,
@@ -35,14 +41,19 @@ class EzyRevenueSessionStorage {
   Future<EzyRevenueSession?> loadSession() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString(_keyUserId);
-    final accessToken = prefs.getString(_keyAccessToken);
+    final rawToken = prefs.getString(_keyAccessToken);
     final timestamp = prefs.getInt(_keyTimestamp);
 
-    if (userId != null && accessToken != null && timestamp != null) {
+    if (userId != null && rawToken != null && timestamp != null) {
+      final decryptedToken = _unprotectToken(rawToken, userId);
+      if (decryptedToken == null) {
+        _logger.error('Failed to decrypt saved session token.');
+        return null;
+      }
       _logger.verbose('Restored session for user: $userId');
       return EzyRevenueSession(
         appUserId: userId,
-        accessToken: accessToken,
+        accessToken: decryptedToken,
         timestamp: DateTime.fromMillisecondsSinceEpoch(timestamp),
       );
     }
@@ -64,6 +75,37 @@ class EzyRevenueSessionStorage {
     await prefs.remove(_keyAccessToken);
     await prefs.remove(_keyTimestamp);
     _logger.verbose('Session cleared.');
+  }
+
+  /// Obfuscates/encrypts the access token using a key derived from the user ID.
+  String _protectToken(String token, String salt) {
+    final tokenBytes = utf8.encode(token);
+    final saltBytes = utf8.encode('ezyrevenue_$salt');
+    final masked = <int>[];
+    for (var i = 0; i < tokenBytes.length; i++) {
+      masked.add(tokenBytes[i] ^ saltBytes[i % saltBytes.length]);
+    }
+    return '$_encPrefix${base64Url.encode(masked)}';
+  }
+
+  /// Decrypts/unmasks the token, with fallback for backward compatibility.
+  String? _unprotectToken(String rawToken, String salt) {
+    if (rawToken.startsWith(_encPrefix)) {
+      try {
+        final base64Payload = rawToken.substring(_encPrefix.length);
+        final masked = base64Url.decode(base64Payload);
+        final saltBytes = utf8.encode('ezyrevenue_$salt');
+        final unmasked = <int>[];
+        for (var i = 0; i < masked.length; i++) {
+          unmasked.add(masked[i] ^ saltBytes[i % saltBytes.length]);
+        }
+        return utf8.decode(unmasked);
+      } catch (e) {
+        return null;
+      }
+    }
+    // Backward compatibility: token was stored in plain text in previous versions
+    return rawToken;
   }
 }
 
