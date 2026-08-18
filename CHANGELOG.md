@@ -1,3 +1,9 @@
+## 0.0.4
+
+* Updated Google Play Billing Library to version `8.0.0` or later to comply with Google Play requirements.
+* Migrated Android billing flow to support `PendingPurchasesParams` with one-time products and prepaid plans.
+* Updated `queryProductDetailsAsync` callbacks to work with `QueryProductDetailsResult`.
+
 ## 0.0.3
 
 * Fixed Web & WASM compatibility by removing direct `dart:io` dependency in client code.

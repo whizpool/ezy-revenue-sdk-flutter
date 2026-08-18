@@ -29,9 +29,14 @@ class EzyrevenuePlugin :
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ezyrevenue")
         channel.setMethodCallHandler(this)
 
+        val pendingPurchasesParams = PendingPurchasesParams.newBuilder()
+            .enableOneTimeProducts()
+            .enablePrepaidPlans()
+            .build()
+
         billingClient = BillingClient.newBuilder(context!!)
             .setListener(this)
-            .enablePendingPurchases()
+            .enablePendingPurchases(pendingPurchasesParams)
             .build()
     }
 
@@ -130,9 +135,9 @@ class EzyrevenuePlugin :
                     val querySubsParams = QueryProductDetailsParams.newBuilder().setProductList(subsToQuery).build()
                     val queryInAppParams = QueryProductDetailsParams.newBuilder().setProductList(inAppToQuery).build()
 
-                    billingClient?.queryProductDetailsAsync(querySubsParams) { res1, subsList ->
+                    billingClient?.queryProductDetailsAsync(querySubsParams) { res1, querySubsResult ->
                         if (res1.responseCode == BillingClient.BillingResponseCode.OK) {
-                            subsList.forEach { details ->
+                            querySubsResult.productDetailsList.forEach { details ->
                                 val productMap = mutableMapOf<String, Any>()
                                 productMap["identifier"] = details.productId
                                 productMap["title"] = details.title
@@ -145,9 +150,9 @@ class EzyrevenuePlugin :
                             }
                         }
                         
-                        billingClient?.queryProductDetailsAsync(queryInAppParams) { res2, inAppList ->
+                        billingClient?.queryProductDetailsAsync(queryInAppParams) { res2, queryInAppResult ->
                             if (res2.responseCode == BillingClient.BillingResponseCode.OK) {
-                                inAppList.forEach { details ->
+                                queryInAppResult.productDetailsList.forEach { details ->
                                     val productMap = mutableMapOf<String, Any>()
                                     productMap["identifier"] = details.productId
                                     productMap["title"] = details.title
@@ -186,7 +191,8 @@ class EzyrevenuePlugin :
             )
             .build()
 
-        billingClient?.queryProductDetailsAsync(querySubsParams) { billingResult, productDetailsList ->
+        billingClient?.queryProductDetailsAsync(querySubsParams) { billingResult, querySubsResult ->
+            val productDetailsList = querySubsResult.productDetailsList
             println("Subs query result: ${billingResult.responseCode}, size: ${productDetailsList.size}")
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList.isNotEmpty()) {
                 launchBillingFlow(productDetailsList[0], appUserId)
@@ -203,7 +209,8 @@ class EzyrevenuePlugin :
                     )
                     .build()
 
-                billingClient?.queryProductDetailsAsync(queryInAppParams) { inAppResult, inAppDetailsList ->
+                billingClient?.queryProductDetailsAsync(queryInAppParams) { inAppResult, queryInAppResult ->
+                    val inAppDetailsList = queryInAppResult.productDetailsList
                     println("In-app query result: ${inAppResult.responseCode}, size: ${inAppDetailsList.size}")
                     if (inAppResult.responseCode == BillingClient.BillingResponseCode.OK && inAppDetailsList.isNotEmpty()) {
                         launchBillingFlow(inAppDetailsList[0], appUserId)

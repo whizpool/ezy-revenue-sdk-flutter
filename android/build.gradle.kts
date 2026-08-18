@@ -46,7 +46,7 @@ android {
 }
 
 dependencies {
-    api("com.android.billingclient:billing:7.1.1")
+    api("com.android.billingclient:billing:8.0.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.0.0")
 }
